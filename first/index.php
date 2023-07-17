@@ -1,20 +1,77 @@
 <?php
 require_once "pdo.php";
-if (isset($_POST["first"]) && isset($_POST["last"]) && isset($_POST["rollnumber"]) && isset($_POST["department"]) && isset($_POST["hostel"])) {
-  $sql = "INSERT INTO INFO (Rollnumber ,Firstname , Lastname ,Department , Hostel) VALUES (:rollnumber ,:first , :last , :department , :hostel)";
+require __DIR__ . '/../vendor/autoload.php';
+
+use Twilio\Rest\Client;
+
+if (isset($_POST["first"]) && isset($_POST["last"]) && isset($_POST["phone"]) && isset($_POST["rollnumber"]) && isset($_POST["department"]) && isset($_POST["hostel"])) {
+  $sql = "INSERT INTO INFO (Rollnumber ,Firstname , Lastname ,Phone ,Department , Hostel) VALUES (:rollnumber ,:first , :last ,:phone, :department , :hostel)";
   $stmt = $pdo->prepare($sql);
   $stmt->execute(array(
     ":rollnumber" => $_POST["rollnumber"],
     ":first" => $_POST["first"],
     ":last" => $_POST["last"],
+    ":phone" => $_POST["phone"],
     ":department" => $_POST["department"],
     ":hostel" => $_POST["hostel"]
   ));
+
+  //twilio rest_api setup
+
+  $sid = 'AC95abf4129a7449c73c50791187da6619';
+  $token = '68d1c1c94bf120e148ff0e831421d946';
+
+  $twilio = new Client($sid, $token);
+  $message = $twilio->messages
+    ->create(
+      $_POST['phone'], // to
+      [
+        "body" => "Congratulations!! You are succesfully registered.\nPlease verify your credentials in given database.\nThanks for joining us !!!",
+        "from" => "+15736976411",
+      ]
+    );
+
+  if ($message->sid) {
+    echo "Message sent successfully !!";
+  } else {
+    echo "Credentials not proper !!";
+  }
 }
 ?>
 
 <?php
 if (isset($_POST["delete"]) && isset($_POST["user_id"])) {
+
+  // Preparing and executing the SQL query to select the Phone based on user_id
+  $command = "SELECT Phone FROM INFO WHERE user_id = :user_id";
+  $prepare = $pdo->prepare($command);
+  $prepare->execute(array(':user_id' => $_POST["user_id"]));
+
+  // Fetching the result (Phone value) from the query
+  $row = $prepare->fetch(PDO::FETCH_ASSOC);
+  $phone = $row['Phone'];
+
+  //twilio rest_api setup
+  $sid = 'AC95abf4129a7449c73c50791187da6619';
+  $token = '68d1c1c94bf120e148ff0e831421d946';
+
+  $twilio = new Client($sid, $token);
+  $message = $twilio->messages
+    ->create(
+      $phone, // to
+      [
+        "body" => "Congratulations!! You are succesfully deregistered.\nPlease verify your credentials are deleted from given database.\nThanks for being part of us !!!",
+        "from" => "+15736976411",
+      ]
+    );
+
+  if ($message->sid) {
+    echo "Message sent successfully !!";
+  } else {
+    echo "Credentials not proper !!";
+  }
+
+  //Deletion Operation
   $sql = "DELETE FROM INFO WHERE user_id = :zip";
   $stmt = $pdo->prepare($sql);
   $stmt->execute(array(':zip' => $_POST["user_id"]));
@@ -143,6 +200,10 @@ if (isset($_POST["delete"]) && isset($_POST["user_id"])) {
             <label for="lname" class="form-label">Last Name</label>
             <input type="text" class="form-control" id="lname" name="last" placeholder="Smith">
           </div>
+          <div class="mb-3 col">
+            <label for="lname" class="form-label">Contact Info</label>
+            <input type="text" class="form-control" id="phone" name="phone" placeholder="+91 XXXXX XXXXX">
+          </div>
         </div>
         <div class="mb-3 col">
           <label for="Rollnumber" class="form-label">Roll Number</label>
@@ -221,7 +282,7 @@ if (isset($_POST["delete"]) && isset($_POST["user_id"])) {
             "Physics Department"
           );
           $options = array("H1", "H2", "H3", "H1", "H4", "H5", "H6", "H7", "H8", "H9", "H10", "H11", "H12", "H13", "H14");
-          $stmt = $pdo->query("SELECT user_id, Rollnumber ,Firstname , Lastname ,Department , Hostel FROM INFO");
+          $stmt = $pdo->query("SELECT user_id, Rollnumber ,Firstname , Lastname ,Phone ,Department , Hostel FROM INFO");
           while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             echo "<tr><td>";
             echo ($row["Rollnumber"]);
