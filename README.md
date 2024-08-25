@@ -49,7 +49,7 @@ php -S localhost:8000
 Visit http://localhost:8000 in your web browser to access the portal.
 
 ## Hosting
-This project is hosted on [eklavya.kesug.com](https://eklavya.kesug.com).
+This project is hosted on [eklavya.kesug.com](eklavya.kesug.com).
 
 
 Contact
