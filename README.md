@@ -49,9 +49,9 @@ php -S localhost:8000
 Visit http://localhost:8000 in your web browser to access the portal.
 
 ## Hosting
-This project is hosted on eklavya.kesug.com.
+This project is hosted on [eklavyakesug.com](https://eklavyakesug.com).
 
 
 Contact
-For any inquiries or support, please contact Sahil Barbade at sahilbarbade1203@example.com.
+For any inquiries or support, please contact Sahil Barbade at sahilbarbade1203@gmail.com.
 
